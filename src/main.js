@@ -1,4 +1,6 @@
+const mainContainer = document.querySelector(`.main`);
 const conrolsContainer = document.querySelector(`.main__control`);
+
 const controls = [{
     name: `new-task`,
     description: `+ ADD NEW TASK`,
