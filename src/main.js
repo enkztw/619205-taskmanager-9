@@ -19,6 +19,12 @@ const controls = [{
 
 ];
 
+const search = {
+    name: `Search`,
+    description: `START TYPING — SEARCH BY WORD, #HASHTAG OR DATE`
+};
+
+// Controls
 const generateControlTemplate = ({name, description, isChecked}) => {
     return `
     <input type="radio" name="control" id="control__${name}" class="control__input visually-hidden" ${isChecked ? `checked`: ``}/>
@@ -45,6 +51,24 @@ const renderControls = (controls, container) => {
     container.appendChild(controlsWrap);
 }
 
+// Search
+const generateSearchTemplate = ({name, description}) => {
+    return `<input type="text" id="${name.toLowerCase()}__input" class="${name.toLowerCase()}__input" placeholder="${description}" />
+  <label class="visually-hidden" for="${name.toLowerCase()}__input">${name}</label>`.trim();
+}
+
+const renderSearch = (search, container) => {
+    const searchWrap = document.createElement(`section`);
+    searchWrap.classList.add(`main__search`, `search`, `container`);
+
+    const searchTemplate = generateSearchTemplate(search);
+    searchWrap.innerHTML = searchTemplate;
+
+    container.appendChild(searchWrap);
+}
+
+
 
 renderControls(controls, conrolsContainer);
+renderSearch(search, mainContainer);
 
