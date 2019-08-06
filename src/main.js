@@ -33,9 +33,14 @@ const search = {
 const filters = [`All`, `Overdue`, `Today`, `Favorites`, `Repeating`, `Tags`, `Archive`];
 
 
-const colors = [`black`, `blue`, `yellow`, `green`];
+const colors = [`black`, `blue`, `yellow`, `green`, `pink`];
 const hashtagsNames = [`code`, `gym`, `work`];
 const descriptions = [`It Looks Red, Tastes Blue`, `Mozart Season`, `Let There Be Love`, `Время лечит, слова калечат`, `Грокаем Алгоритмы`];
+
+const button = {
+  name: `load-more`,
+  description: `load more`
+};
 
 // Controls
 const generateControlTemplate = ({
@@ -511,8 +516,24 @@ const renderNewCards = (number, container) => {
   container.appendChild(fragment);
 };
 
+// Button
+const generateButtonTemplate = ({name, description}) => {
+  return `<button class="${name}" type="button">${description}</button>`;
+};
+
+const renderButton = (buttonData, container) => {
+  const buttonWrap = document.createElement(`div`);
+  const buttonTemplate = generateButtonTemplate(buttonData);
+
+  buttonWrap.innerHTML = buttonTemplate;
+
+  container.appendChild(buttonWrap);
+};
+
+
 renderControls(controls, conrolsContainer);
 renderSearch(search, mainContainer);
 renderFilters(filters, mainContainer);
 renderCards(getRandomNumber(1, 3), mainContainer);
 renderNewCards(1, document.querySelector(`.board__tasks`));
+renderButton(button, document.querySelector(`.board`));
