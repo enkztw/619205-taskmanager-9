@@ -1,3 +1,5 @@
+'use strict';
+
 // Utils
 const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];
@@ -7,20 +9,20 @@ const mainContainer = document.querySelector(`.main`);
 const conrolsContainer = document.querySelector(`.main__control`);
 
 const controls = [{
-    name: `new-task`,
-    description: `+ ADD NEW TASK`,
-    isChecked: true,
-  },
-  {
-    name: `tasks`,
-    description: `TASKS`,
-    isChecked: false
-  },
-  {
-    name: `statistics`,
-    description: `STATISTICS`,
-    isChecked: false
-  }
+  name: `new-task`,
+  description: `+ ADD NEW TASK`,
+  isChecked: true,
+},
+{
+  name: `tasks`,
+  description: `TASKS`,
+  isChecked: false
+},
+{
+  name: `statistics`,
+  description: `STATISTICS`,
+  isChecked: false
+}
 ];
 
 const search = {
@@ -28,54 +30,12 @@ const search = {
   description: `START TYPING — SEARCH BY WORD, #HASHTAG OR DATE`
 };
 
-const filters = [{
-    name: `All`,
-    count: getRandomNumber(0, 69),
-    isChecked: true,
-    isDisabled: false
-  },
-  {
-    name: `Overdue`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: true
-  },
-  {
-    name: `Today`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: true,
-  },
-  {
-    name: `Favorites`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: false
-  },
-  {
-    name: `Repeating`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: false
-  },
-  {
-    name: `Tags`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: false
-  },
-  {
-    name: `Achive`,
-    count: getRandomNumber(0, 69),
-    isChecked: false,
-    isDisabled: false
-  }
-];
+const filters = [`All`, `Overdue`, `Today`, `Favorites`, `Repeating`, `Tags`, `Archive`];
 
 
 const colors = [`black`, `blue`, `yellow`, `green`];
-const hashtags = [`code`, `gym`, `work`];
-const descriptions = [`It Looks Red, Tastes Blue`, `Mozart Season`, `Let There Be Love`, `Время лечит, слова калечат`, `Грокаем Алгоритмы`]
+const hashtagsNames = [`code`, `gym`, `work`];
+const descriptions = [`It Looks Red, Tastes Blue`, `Mozart Season`, `Let There Be Love`, `Время лечит, слова калечат`, `Грокаем Алгоритмы`];
 
 // Controls
 const generateControlTemplate = ({
@@ -88,21 +48,21 @@ const generateControlTemplate = ({
     <label for="control__${name}" class="control__label control__label--${name}">${description}</label>`.trim();
 };
 
-const generateConrolsTemplate = (controls) => {
+const generateConrolsTemplate = (controlsData) => {
   const controlsTemplate = [];
-  for (const control of controls) {
+  for (const control of controlsData) {
     const controlTemplate = generateControlTemplate(control);
-    controlsTemplate.push(controlTemplate)
+    controlsTemplate.push(controlTemplate);
   }
 
   return controlsTemplate.join(``);
 };
 
-const renderControls = (controls, container) => {
+const renderControls = (controlsData, container) => {
   const controlsWrap = document.createElement(`section`);
   controlsWrap.classList.add(`control__btn-wrap`);
 
-  const controlsTemplate = generateConrolsTemplate(controls);
+  const controlsTemplate = generateConrolsTemplate(controlsData);
   controlsWrap.innerHTML = controlsTemplate;
 
   container.appendChild(controlsWrap);
@@ -118,18 +78,39 @@ const generateSearchTemplate = ({
   <label class="visually-hidden" for="${name.toLowerCase()}__input">${name}</label>`.trim();
 };
 
-const renderSearch = (search, container) => {
+const renderSearch = (searchData, container) => {
   const searchWrap = document.createElement(`section`);
   searchWrap.classList.add(`main__search`, `search`, `container`);
 
-  const searchTemplate = generateSearchTemplate(search);
+  const searchTemplate = generateSearchTemplate(searchData);
   searchWrap.innerHTML = searchTemplate;
 
   container.appendChild(searchWrap);
 };
 
 
-// Filters 
+// Filters
+const generateFiltersData = (filtersNames) => {
+  const filtersData = [];
+  for (const name of filtersNames) {
+    const filterData = {
+      name,
+      count: getRandomNumber(0, 69),
+      isChecked: false,
+      isDisabled: false
+    };
+
+    filtersData.push(filterData);
+  }
+
+  // Checking & disabling random filters
+  filtersData[getRandomNumber(0, filtersData.length - 1)].isChecked = true;
+  const nonCheckedFilters = filtersData.filter((filterData) => !filterData.isChecked);
+  nonCheckedFilters[getRandomNumber(0, nonCheckedFilters.length - 1)].isDisabled = true;
+
+  return filtersData;
+};
+
 const generateFilterTemplate = ({
   name,
   count,
@@ -138,23 +119,25 @@ const generateFilterTemplate = ({
 }) => {
   return `<input type="radio" id="filter__${name.toLowerCase()}" class="filter__input visually-hidden" name="filter" ${isChecked ? `checked` : ``} ${isDisabled ? `disabled` : ``}/>
   <label for="filter__${name.toLowerCase()}" class="filter__label">${name} <span class="filter__all-count">${count}</span></label>`.trim();
-}
+};
 
-const generateFiltersTemplate = (filters) => {
+const generateFiltersTemplate = (filtersNames) => {
   const filtersTemplate = [];
-  for (const filter of filters) {
+  const filtersData = generateFiltersData(filtersNames);
+
+  for (const filter of filtersData) {
     const filterTemplate = generateFilterTemplate(filter);
     filtersTemplate.push(filterTemplate);
   }
 
   return filtersTemplate.join(``);
-}
+};
 
-const renderFilters = (filters, container) => {
+const renderFilters = (filtersNames, container) => {
   const filtersWrap = document.createElement(`section`);
   filtersWrap.classList.add(`main__filter`, `filter`, `container`);
 
-  const filtersTemplate = generateFiltersTemplate(filters);
+  const filtersTemplate = generateFiltersTemplate(filtersNames);
   filtersWrap.innerHTML = filtersTemplate;
 
   container.appendChild(filtersWrap);
@@ -168,7 +151,7 @@ const generateCardsData = (number) => {
   for (let i = 0; i <= number; i++) {
     const cardData = {
       color: getRandomElement(colors),
-      hashtags: hashtags,
+      hashtags: hashtagsNames,
       description: getRandomElement(descriptions),
       date: `${getRandomNumber(1, 31)} August`,
       time: `${getRandomNumber(0, 12)}:${getRandomNumber(0, 60)}`
@@ -187,9 +170,9 @@ const generateCardTemplate = ({
   date,
   time
 }) => {
-  const generateHashtagsTemplate = (hashtags) => {
+  const generateHashtagsTemplate = (hashtagData) => {
     const hashtagsTemplate = [];
-    for (const hashtag of hashtags) {
+    for (const hashtag of hashtagData) {
       const hashtagTemplate = `
       <span class="card__hashtag-inner">
         <span class="card__hashtag-name">
@@ -200,7 +183,7 @@ const generateCardTemplate = ({
       hashtagsTemplate.push(hashtagTemplate);
     }
     return hashtagsTemplate.join(``);
-  }
+  };
 
   return `<article class="card card--${color}">
   <div class="card__form">
@@ -259,9 +242,9 @@ const generateCardsTemplate = (cards) => {
     const cardTemplate = generateCardTemplate(card);
     cardsTemplate.push(cardTemplate);
   }
-  
+
   return cardsTemplate.join(``);
-}
+};
 
 const renderCards = (cardsNumber, container) => {
   const boardWrap = document.createElement(`section`);
@@ -269,7 +252,7 @@ const renderCards = (cardsNumber, container) => {
   const tasksBoard = document.createElement(`div`);
   tasksBoard.classList.add(`board__tasks`);
 
-  
+
   const cardsData = generateCardsData(cardsNumber);
   const cardsTemplate = generateCardsTemplate(cardsData);
 
@@ -281,8 +264,7 @@ const renderCards = (cardsNumber, container) => {
 };
 
 
-
 renderControls(controls, conrolsContainer);
 renderSearch(search, mainContainer);
 renderFilters(filters, mainContainer);
-renderCards(getRandomNumber(1,6), mainContainer);
+renderCards(getRandomNumber(1, 3), mainContainer);
