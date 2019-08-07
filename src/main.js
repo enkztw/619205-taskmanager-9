@@ -95,22 +95,26 @@ const generateSearchTemplate = ({
 
 
 // Filters
+const generateFilterData = (filterName) => {
+  const filterData = {
+    name: filterName,
+    count: getRandomNumber(0, 69),
+    isChecked: false,
+    isDisabled: false
+  };
+
+  if (filterData.count === 0) {
+    filterData.isDisabled = true;
+  }
+
+  return filterData;
+};
+
 const generateFiltersData = (filters) => {
-  const filtersData = filters.map((filterName) => {
-    const filterData = {
-      name: filterName,
-      count: getRandomNumber(0, 69),
-      isChecked: false,
-      isDisabled: false
-    };
+  const filtersData = filters.map(generateFilterData);
 
-    return filterData;
-  });
-
-  // Checking & disabling random filters
-  getRandomElement(filtersData).isChecked = true;
-  const nonCheckedFilters = filtersData.filter((filterData) => !filterData.isChecked);
-  nonCheckedFilters[getRandomNumber(0, nonCheckedFilters.length - 1)].isDisabled = true;
+  const nonDisabledFilters = filtersData.filter((filterData) => !filterData.isDisabled);
+  getRandomElement(nonDisabledFilters).isChecked = true;
 
   return filtersData;
 };
@@ -136,18 +140,20 @@ const generateFiltersTemplate = (filters) => {
 
 
 // Cards
-const generateCardsData = (number) => {
-  const cardsData = new Array(number).fill(null).map(() => {
-    const cardData = {
-      color: getRandomElement(colorsNames),
-      hashtags: hashtagsNames,
-      description: getRandomElement(descriptions),
-      date: `${getRandomNumber(1, 31)} August`,
-      time: `${getRandomNumber(0, 12)}:${getRandomNumber(0, 60)}`
-    };
+const generateCardData = () => {
+  const cardData = {
+    color: getRandomElement(colorsNames),
+    hashtags: hashtagsNames,
+    description: getRandomElement(descriptions),
+    date: `${getRandomNumber(1, 31)} August`,
+    time: `${getRandomNumber(0, 12)}:${getRandomNumber(0, 60)}`
+  };
 
-    return cardData;
-  });
+  return cardData;
+};
+
+const generateCardsData = (number) => {
+  const cardsData = new Array(number).fill(null).map(generateCardData);
 
   return cardsData;
 };
