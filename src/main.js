@@ -30,12 +30,33 @@ const search = {
   description: `START TYPING — SEARCH BY WORD, #HASHTAG OR DATE`
 };
 
-const filters = [`All`, `Overdue`, `Today`, `Favorites`, `Repeating`, `Tags`, `Archive`];
+const filtersNames = [
+  `All`,
+  `Overdue`,
+  `Today`,
+  `Favorites`,
+  `Repeating`,
+  `Tags`,
+  `Archive`
+];
 
 
-const colors = [`black`, `blue`, `yellow`, `green`, `pink`];
+const colorsNames = [
+  `black`,
+  `blue`,
+  `yellow`,
+  `green`,
+  `pink`
+];
+
 const hashtagsNames = [`code`, `gym`, `work`];
-const descriptions = [`It Looks Red, Tastes Blue`, `Mozart Season`, `Let There Be Love`, `Время лечит, слова калечат`, `Грокаем Алгоритмы`];
+const descriptions = [
+  `It Looks Red, Tastes Blue`,
+  `Mozart Season`,
+  `Let There Be Love`,
+  `Время лечит, слова калечат`,
+  `Грокаем Алгоритмы`
+];
 
 const button = {
   name: `load-more`,
@@ -49,16 +70,12 @@ const generateControlTemplate = ({
   isChecked
 }) => {
   return `
-    <input type="radio" name="control" id="control__${name}" class="control__input visually-hidden" ${isChecked ? `checked`: ``}/>
+    <input type="radio" name="control" id="control__${name}" class="control__input visually-hidden" ${isChecked ? `checked` : ``}/>
     <label for="control__${name}" class="control__label control__label--${name}">${description}</label>`.trim();
 };
 
-const generateConrolsTemplate = (controlsData) => {
-  const controlsTemplate = [];
-  for (const control of controlsData) {
-    const controlTemplate = generateControlTemplate(control);
-    controlsTemplate.push(controlTemplate);
-  }
+const generateConrolsTemplate = (items) => {
+  const controlsTemplate = items.map((item) => generateControlTemplate(item));
 
   return controlsTemplate.join(``);
 };
@@ -70,7 +87,7 @@ const renderControls = (controlsData, container) => {
   const controlsTemplate = generateConrolsTemplate(controlsData);
   controlsWrap.innerHTML = controlsTemplate;
 
-  container.appendChild(controlsWrap);
+  container.append(controlsWrap);
 };
 
 
@@ -79,8 +96,11 @@ const generateSearchTemplate = ({
   name,
   description
 }) => {
-  return `<input type="text" id="${name.toLowerCase()}__input" class="${name.toLowerCase()}__input" placeholder="${description}" />
+  const searchTemplate =
+    `<input type="text" id="${name.toLowerCase()}__input" class="${name.toLowerCase()}__input" placeholder="${description}" />
   <label class="visually-hidden" for="${name.toLowerCase()}__input">${name}</label>`.trim();
+
+  return searchTemplate;
 };
 
 const renderSearch = (searchData, container) => {
@@ -90,26 +110,25 @@ const renderSearch = (searchData, container) => {
   const searchTemplate = generateSearchTemplate(searchData);
   searchWrap.innerHTML = searchTemplate;
 
-  container.appendChild(searchWrap);
+  container.append(searchWrap);
 };
 
 
 // Filters
-const generateFiltersData = (filtersNames) => {
-  const filtersData = [];
-  for (const name of filtersNames) {
+const generateFiltersData = (filters) => {
+  const filtersData = filters.map((filterName) => {
     const filterData = {
-      name,
+      name: filterName,
       count: getRandomNumber(0, 69),
       isChecked: false,
       isDisabled: false
     };
 
-    filtersData.push(filterData);
-  }
+    return filterData;
+  });
 
   // Checking & disabling random filters
-  filtersData[getRandomNumber(0, filtersData.length - 1)].isChecked = true;
+  getRandomElement(filtersData).isChecked = true;
   const nonCheckedFilters = filtersData.filter((filterData) => !filterData.isChecked);
   nonCheckedFilters[getRandomNumber(0, nonCheckedFilters.length - 1)].isDisabled = true;
 
@@ -119,53 +138,65 @@ const generateFiltersData = (filtersNames) => {
 const generateFilterTemplate = ({
   name,
   count,
-  isChecked = false,
-  isDisabled = false
+  isChecked,
+  isDisabled
 }) => {
-  return `<input type="radio" id="filter__${name.toLowerCase()}" class="filter__input visually-hidden" name="filter" ${isChecked ? `checked` : ``} ${isDisabled ? `disabled` : ``}/>
-  <label for="filter__${name.toLowerCase()}" class="filter__label">${name} <span class="filter__all-count">${count}</span></label>`.trim();
+  const filterTemplate =
+    `<input type="radio" id="filter__${name.toLowerCase()}" class="filter__input visually-hidden" name="filter" ${isChecked ? `checked` : ``} ${isDisabled ? `disabled` : ``}/>
+    <label for="filter__${name.toLowerCase()}" class="filter__label">${name} <span class="filter__all-count">${count}</span></label>`.trim();
+  return filterTemplate;
 };
 
-const generateFiltersTemplate = (filtersNames) => {
-  const filtersTemplate = [];
-  const filtersData = generateFiltersData(filtersNames);
-
-  for (const filter of filtersData) {
-    const filterTemplate = generateFilterTemplate(filter);
-    filtersTemplate.push(filterTemplate);
-  }
+const generateFiltersTemplate = (filters) => {
+  const filtersData = generateFiltersData(filters);
+  const filtersTemplate = filtersData.map((filterData) => generateFilterTemplate(filterData));
 
   return filtersTemplate.join(``);
 };
 
-const renderFilters = (filtersNames, container) => {
+const renderFilters = (filters, container) => {
   const filtersWrap = document.createElement(`section`);
   filtersWrap.classList.add(`main__filter`, `filter`, `container`);
 
-  const filtersTemplate = generateFiltersTemplate(filtersNames);
+  const filtersTemplate = generateFiltersTemplate(filters);
   filtersWrap.innerHTML = filtersTemplate;
 
-  container.appendChild(filtersWrap);
+  container.append(filtersWrap);
 };
 
 
 // Cards
 const generateCardsData = (number) => {
-  const cardsData = [];
-
-  for (let i = 0; i < number; i++) {
+  const cardsData = new Array(number).fill(null).map(() => {
     const cardData = {
-      color: getRandomElement(colors),
+      color: getRandomElement(colorsNames),
       hashtags: hashtagsNames,
       description: getRandomElement(descriptions),
       date: `${getRandomNumber(1, 31)} August`,
       time: `${getRandomNumber(0, 12)}:${getRandomNumber(0, 60)}`
     };
 
-    cardsData.push(cardData);
-  }
+    return cardData;
+  });
 
   return cardsData;
+};
+
+const generateHashtagTemplate = (hashtag) => {
+  const hashtagTemplate =
+  `<span class="card__hashtag-inner">
+    <span class="card__hashtag-name">
+      #${hashtag}
+    </span>
+  </span>`.trim();
+
+  return hashtagTemplate;
+};
+
+const generateHashtagsTemplate = (hashtags) => {
+  const hashtagsTemplate = hashtags.map((hashtag) => generateHashtagTemplate(hashtag));
+
+  return hashtagsTemplate.join(``);
 };
 
 const generateCardTemplate = ({
@@ -175,22 +206,7 @@ const generateCardTemplate = ({
   date,
   time
 }) => {
-  const generateHashtagsTemplate = (hashtagData) => {
-    const hashtagsTemplate = [];
-    for (const hashtag of hashtagData) {
-      const hashtagTemplate = `
-      <span class="card__hashtag-inner">
-        <span class="card__hashtag-name">
-          #${hashtag}
-        </span>
-      </span>`;
-
-      hashtagsTemplate.push(hashtagTemplate);
-    }
-    return hashtagsTemplate.join(``);
-  };
-
-  return `<article class="card card--${color}">
+  const cardTemplate = `<article class="card card--${color}">
   <div class="card__form">
     <div class="card__inner">
       <div class="card__control">
@@ -239,14 +255,12 @@ const generateCardTemplate = ({
     </div>
   </div>
 </article>`.trim();
+
+  return cardTemplate;
 };
 
 const generateCardsTemplate = (cards) => {
-  const cardsTemplate = [];
-  for (const card of cards) {
-    const cardTemplate = generateCardTemplate(card);
-    cardsTemplate.push(cardTemplate);
-  }
+  const cardsTemplate = cards.map((card) => generateCardTemplate(card));
 
   return cardsTemplate.join(``);
 };
@@ -264,11 +278,25 @@ const renderCards = (cardsNumber, container) => {
 
   tasksBoard.innerHTML = cardsTemplate;
 
-  boardWrap.appendChild(tasksBoard);
-  container.appendChild(boardWrap);
+  boardWrap.append(tasksBoard);
+  container.append(boardWrap);
 };
 
 // New card
+const generateColorTemplate = (color) => {
+  const colorTemplate =
+  `<input type="radio" id="color-${color}-1" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}" ${color === `black` ? `checked` : ``}/>
+  <label for="color-${color}-1" class="card__color card__color--${color}">${color}</label>`;
+
+  return colorTemplate;
+};
+
+const generateColorsTemplate = (colors) => {
+  const colorsTemplate = colors.map((color) => generateColorTemplate(color));
+
+  return colorsTemplate.join(``);
+};
+
 const generateNewCardTemplate = () => {
   return `<article class="card card--edit card--black">
   <form class="card__form" method="get">
@@ -419,67 +447,7 @@ const generateNewCardTemplate = () => {
         <div class="card__colors-inner">
           <h3 class="card__colors-title">Color</h3>
           <div class="card__colors-wrap">
-            <input
-              type="radio"
-              id="color-black-1"
-              class="card__color-input card__color-input--black visually-hidden"
-              name="color"
-              value="black"
-              checked
-            />
-            <label
-              for="color-black-1"
-              class="card__color card__color--black"
-              >black</label
-            >
-            <input
-              type="radio"
-              id="color-yellow-1"
-              class="card__color-input card__color-input--yellow visually-hidden"
-              name="color"
-              value="yellow"
-            />
-            <label
-              for="color-yellow-1"
-              class="card__color card__color--yellow"
-              >yellow</label
-            >
-            <input
-              type="radio"
-              id="color-blue-1"
-              class="card__color-input card__color-input--blue visually-hidden"
-              name="color"
-              value="blue"
-            />
-            <label
-              for="color-blue-1"
-              class="card__color card__color--blue"
-              >blue</label
-            >
-            <input
-              type="radio"
-              id="color-green-1"
-              class="card__color-input card__color-input--green visually-hidden"
-              name="color"
-              value="green"
-            />
-            <label
-              for="color-green-1"
-              class="card__color card__color--green"
-              >green</label
-            >
-            <input
-              type="radio"
-              id="color-pink-1"
-              class="card__color-input card__color-input--pink visually-hidden"
-              name="color"
-              value="pink"
-            />
-            <label
-              for="color-pink-1"
-              class="card__color card__color--pink"
-              >pink</label
-            >
+            ${generateColorsTemplate(colorsNames)}
           </div>
         </div>
       </div>
@@ -494,46 +462,37 @@ const generateNewCardTemplate = () => {
 };
 
 const generateNewCardsTemplates = (number) => {
-  const newCardsTemplates = [];
-  for (let i = 0; i < number; i++) {
-    const newCardTemplate = generateNewCardTemplate();
-    newCardsTemplates.push(newCardTemplate);
-  }
+  const newCardsTemplates = new Array(number).fill(null).map(() => generateNewCardTemplate());
 
   return newCardsTemplates;
 };
 
 const renderNewCards = (number, container) => {
   const newCardsTemplates = generateNewCardsTemplates(number);
-  const fragment = document.createDocumentFragment();
-  for (const newCardTemplate of newCardsTemplates) {
-    const newCardWrap = document.createElement(`div`);
-    newCardWrap.innerHTML = newCardTemplate;
 
-    fragment.appendChild(newCardWrap);
-  }
-
-  container.appendChild(fragment);
+  container.insertAdjacentHTML(`beforeend`, newCardsTemplates);
 };
 
 // Button
-const generateButtonTemplate = ({name, description}) => {
-  return `<button class="${name}" type="button">${description}</button>`;
+const generateButtonTemplate = ({
+  name,
+  description
+}) => {
+  const buttonTemplate = `<button class="${name}" type="button">${description}</button>`;
+
+  return buttonTemplate;
 };
 
 const renderButton = (buttonData, container) => {
-  const buttonWrap = document.createElement(`div`);
   const buttonTemplate = generateButtonTemplate(buttonData);
 
-  buttonWrap.innerHTML = buttonTemplate;
-
-  container.appendChild(buttonWrap);
+  container.insertAdjacentHTML(`beforeend`, buttonTemplate);
 };
 
 
 renderControls(controls, conrolsContainer);
 renderSearch(search, mainContainer);
-renderFilters(filters, mainContainer);
+renderFilters(filtersNames, mainContainer);
 renderCards(getRandomNumber(1, 3), mainContainer);
 renderNewCards(1, document.querySelector(`.board__tasks`));
 renderButton(button, document.querySelector(`.board`));
