@@ -5,6 +5,7 @@ const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)
 const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];
 
 // Consts
+const CARDS = 3;
 const mainContainer = document.querySelector(`.main`);
 
 const controls = [{
@@ -79,12 +80,6 @@ const generateConrolsTemplate = (items) => {
   return controlsTemplate.join(``);
 };
 
-const renderControls = (controlsData, container) => {
-  const controlsTemplate = generateConrolsTemplate(controlsData);
-
-  container.insertAdjacentHTML(`beforeend`, controlsTemplate);
-};
-
 
 // Search
 const generateSearchTemplate = ({
@@ -96,12 +91,6 @@ const generateSearchTemplate = ({
   <label class="visually-hidden" for="${name.toLowerCase()}__input">${name}</label>`.trim();
 
   return searchTemplate;
-};
-
-const renderSearch = (searchData, container) => {
-  const searchTemplate = generateSearchTemplate(searchData);
-
-  container.insertAdjacentHTML(`beforeend`, searchTemplate);
 };
 
 
@@ -143,16 +132,6 @@ const generateFiltersTemplate = (filters) => {
   const filtersTemplate = filtersData.map((filterData) => generateFilterTemplate(filterData));
 
   return filtersTemplate.join(``);
-};
-
-const renderFilters = (filters, container) => {
-  const filtersWrap = document.createElement(`section`);
-  filtersWrap.classList.add(`main__filter`, `filter`, `container`);
-
-  const filtersTemplate = generateFiltersTemplate(filters);
-  filtersWrap.innerHTML = filtersTemplate;
-
-  container.append(filtersWrap);
 };
 
 
@@ -250,18 +229,13 @@ const generateCardTemplate = ({
   return cardTemplate;
 };
 
-const generateCardsTemplate = (cards) => {
+const generateCardsTemplate = (cardsNumber) => {
+  const cards = generateCardsData(cardsNumber);
   const cardsTemplate = cards.map((card) => generateCardTemplate(card));
 
   return cardsTemplate.join(``);
 };
 
-const renderCards = (cardsNumber, container) => {
-  const cardsData = generateCardsData(cardsNumber);
-  const cardsTemplate = generateCardsTemplate(cardsData);
-
-  container.insertAdjacentHTML(`beforeend`, cardsTemplate);
-};
 
 // New card
 const generateColorTemplate = (color) => {
@@ -442,17 +416,6 @@ const generateNewCardTemplate = () => {
 </article>`.trim();
 };
 
-const generateNewCardsTemplates = (number) => {
-  const newCardsTemplates = new Array(number).fill(null).map(() => generateNewCardTemplate());
-
-  return newCardsTemplates;
-};
-
-const renderNewCards = (number, container) => {
-  const newCardsTemplates = generateNewCardsTemplates(number);
-
-  container.insertAdjacentHTML(`beforeend`, newCardsTemplates);
-};
 
 // Button
 const generateButtonTemplate = ({
@@ -464,13 +427,8 @@ const generateButtonTemplate = ({
   return buttonTemplate;
 };
 
-const renderButton = (buttonData, container) => {
-  const buttonTemplate = generateButtonTemplate(buttonData);
 
-  container.insertAdjacentHTML(`beforeend`, buttonTemplate);
-};
-
-// Containers
+// Containers & components
 const renderContainer = (type, classes, parentContainer) => {
   const container = document.createElement(type);
 
@@ -479,6 +437,10 @@ const renderContainer = (type, classes, parentContainer) => {
   }
 
   parentContainer.append(container);
+};
+
+const renderComponent = (template, container) => {
+  container.insertAdjacentHTML(`beforeend`, template);
 };
 
 
@@ -501,10 +463,9 @@ const boardContainer = document.querySelector(`.board`);
 renderContainer(`div`, [`board__tasks`], boardContainer);
 const tasksContainer = document.querySelector(`.board__tasks`);
 
-
-renderControls(controls, controlsContainer);
-renderSearch(search, searchContainer);
-renderFilters(filtersNames, filtersContainer);
-renderNewCards(1, tasksContainer);
-renderCards(getRandomNumber(1, 3), tasksContainer);
-renderButton(button, boardContainer);
+renderComponent(generateConrolsTemplate(controls), controlsContainer);
+renderComponent(generateSearchTemplate(search), searchContainer);
+renderComponent(generateFiltersTemplate(filtersNames), filtersContainer);
+renderComponent(generateNewCardTemplate(), tasksContainer);
+renderComponent(generateCardsTemplate(CARDS), tasksContainer);
+renderComponent(generateButtonTemplate(button), boardContainer);
