@@ -6,7 +6,6 @@ const getRandomElement = (array) => array[Math.floor(Math.random() * array.lengt
 
 // Consts
 const mainContainer = document.querySelector(`.main`);
-const conrolsContainer = document.querySelector(`.main__control`);
 
 const controls = [{
   name: `new-task`,
@@ -81,13 +80,9 @@ const generateConrolsTemplate = (items) => {
 };
 
 const renderControls = (controlsData, container) => {
-  const controlsWrap = document.createElement(`section`);
-  controlsWrap.classList.add(`control__btn-wrap`);
-
   const controlsTemplate = generateConrolsTemplate(controlsData);
-  controlsWrap.innerHTML = controlsTemplate;
 
-  container.append(controlsWrap);
+  container.insertAdjacentHTML(`beforeend`, controlsTemplate);
 };
 
 
@@ -104,13 +99,9 @@ const generateSearchTemplate = ({
 };
 
 const renderSearch = (searchData, container) => {
-  const searchWrap = document.createElement(`section`);
-  searchWrap.classList.add(`main__search`, `search`, `container`);
-
   const searchTemplate = generateSearchTemplate(searchData);
-  searchWrap.innerHTML = searchTemplate;
 
-  container.append(searchWrap);
+  container.insertAdjacentHTML(`beforeend`, searchTemplate);
 };
 
 
@@ -266,20 +257,10 @@ const generateCardsTemplate = (cards) => {
 };
 
 const renderCards = (cardsNumber, container) => {
-  const boardWrap = document.createElement(`section`);
-  boardWrap.classList.add(`board`, `container`);
-  const tasksBoard = document.createElement(`div`);
-  tasksBoard.classList.add(`board__tasks`);
-
-
   const cardsData = generateCardsData(cardsNumber);
   const cardsTemplate = generateCardsTemplate(cardsData);
 
-
-  tasksBoard.innerHTML = cardsTemplate;
-
-  boardWrap.append(tasksBoard);
-  container.append(boardWrap);
+  container.insertAdjacentHTML(`beforeend`, cardsTemplate);
 };
 
 // New card
@@ -489,10 +470,41 @@ const renderButton = (buttonData, container) => {
   container.insertAdjacentHTML(`beforeend`, buttonTemplate);
 };
 
+// Containers
+const renderContainer = (type, classes, parentContainer) => {
+  const container = document.createElement(type);
 
-renderControls(controls, conrolsContainer);
-renderSearch(search, mainContainer);
-renderFilters(filtersNames, mainContainer);
-renderCards(getRandomNumber(1, 3), mainContainer);
-renderNewCards(1, document.querySelector(`.board__tasks`));
-renderButton(button, document.querySelector(`.board`));
+  for (const className of classes) {
+    container.classList.add(className);
+  }
+
+  parentContainer.append(container);
+};
+
+
+// Controls container
+const controlsContainer = document.querySelector(`.main__control`);
+
+// Search container
+renderContainer(`section`, [`main__search`, `search`, `container`], mainContainer);
+const searchContainer = document.querySelector(`.main__search`);
+
+// Filters container
+renderContainer(`section`, [`main__filter`, `filter`, `container`], mainContainer);
+const filtersContainer = document.querySelector(`.main__filter`);
+
+// Board container
+renderContainer(`section`, [`board`, `container`], mainContainer);
+const boardContainer = document.querySelector(`.board`);
+
+// Tasks container
+renderContainer(`div`, [`board__tasks`], boardContainer);
+const tasksContainer = document.querySelector(`.board__tasks`);
+
+
+renderControls(controls, controlsContainer);
+renderSearch(search, searchContainer);
+renderFilters(filtersNames, filtersContainer);
+renderNewCards(1, tasksContainer);
+renderCards(getRandomNumber(1, 3), tasksContainer);
+renderButton(button, boardContainer);
