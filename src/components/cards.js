@@ -67,10 +67,10 @@ const generateHashtagsTemplate = (tags) => Array.from(tags)
   .map(generateHashtagTemplate).join(``);
 
 
-const getRepeatedState = (repeatingDays) => Array.from(repeatingDays.values())
+const checkIsRepeated = (repeatingDays) => Array.from(repeatingDays.values())
   .some((isRepeatedDay) => isRepeatedDay);
 
-const getOutdatedState = (dueDate) => dueDate < new Date();
+const checkIsOutdated = (dueDate) => dueDate < new Date();
 
 const generateCardTemplate = ({
   description,
@@ -81,7 +81,7 @@ const generateCardTemplate = ({
   isFavorite,
   isArchive
 }) => {
-  const cardTemplate = `<article class="card card--${color} ${getRepeatedState(repeatingDays) ? `card--repeat` : ``} ${getOutdatedState(dueDate) ? `card--deadline` : ``}">
+  const cardTemplate = `<article class="card card--${color} ${checkIsRepeated(repeatingDays) ? `card--repeat` : ``} ${checkIsOutdated(dueDate) ? `card--deadline` : ``}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -140,6 +140,6 @@ export {colorNames};
 export {months};
 export {generateCardsData};
 export {generateCardsTemplate};
-export {getRepeatedState};
-export {getOutdatedState};
+export {checkIsRepeated};
+export {checkIsOutdated};
 

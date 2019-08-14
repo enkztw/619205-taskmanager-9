@@ -1,7 +1,7 @@
 import {colorNames} from './cards';
 import {months} from './cards';
-import {getRepeatedState} from './cards';
-import {getOutdatedState} from './cards';
+import {checkIsRepeated} from './cards';
+import {checkIsOutdated} from './cards';
 
 const generateColorTemplate = (color, currentColor) => {
   const colorTemplate =
@@ -48,7 +48,7 @@ const generateNewCardTemplate = ({
   isFavorite,
   isArchive
 }) => {
-  return `<article class="card card--edit card--${color} ${getRepeatedState(repeatingDays) ? `card--repeat` : ``} ${getOutdatedState(dueDate) ? `card--deadline` : ``}">
+  return `<article class="card card--edit card--${color} ${checkIsRepeated(repeatingDays) ? `card--repeat` : ``} ${checkIsOutdated(dueDate) ? `card--deadline` : ``}">
   <form class="card__form" method="get">
     <div class="card__inner">
       <div class="card__control">

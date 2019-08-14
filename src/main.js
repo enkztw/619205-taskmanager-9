@@ -18,7 +18,10 @@ import {generateNewCardTemplate} from './components/card-edit';
 import {button} from './components/button';
 import {generateButtonTemplate} from './components/button';
 
-const MAX_CARDS_ON_BOARD = 7;
+const MAX_CARDS_ON_BOARD = 8;
+const [firstCard, ...lastsCards] = cards;
+
+// Main container
 const mainContainer = document.querySelector(`.main`);
 
 // Controls container
@@ -39,13 +42,13 @@ const tasksContainer = renderContainer(`div`, [`board__tasks`], boardContainer);
 renderComponent(generateConrolsTemplate(controls), controlsContainer);
 renderComponent(generateSearchTemplate(search), searchContainer);
 renderComponent(generateFiltersTemplate(filterNames), filtersContainer);
-renderComponent(generateNewCardTemplate(cards[0]), tasksContainer);
-renderComponent(generateCardsTemplate(cards.slice(1, MAX_CARDS_ON_BOARD)), tasksContainer);
+renderComponent(generateNewCardTemplate(firstCard), tasksContainer);
+renderComponent(generateCardsTemplate(lastsCards.slice(0, MAX_CARDS_ON_BOARD - 1)), tasksContainer);
 renderComponent(generateButtonTemplate(button), boardContainer);
 
 const loadMoreButton = document.querySelector(`.load-more`);
 const onLoadMoreButtonClick = () => {
-  renderComponent(generateCardsTemplate(cards.slice(MAX_CARDS_ON_BOARD)), tasksContainer);
+  renderComponent(generateCardsTemplate(lastsCards.slice(MAX_CARDS_ON_BOARD - 1)), tasksContainer);
   loadMoreButton.remove();
 };
 
