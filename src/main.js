@@ -1,6 +1,8 @@
 import {renderContainer} from './components/dom-utils';
 import {renderComponent} from './components/dom-utils';
 
+import {cards} from './data';
+
 import {controls} from './components/controls';
 import {generateConrolsTemplate} from './components/controls';
 
@@ -16,8 +18,10 @@ import {generateNewCardTemplate} from './components/card-edit';
 import {button} from './components/button';
 import {generateButtonTemplate} from './components/button';
 
+const MAX_CARDS_ON_BOARD = 8;
+const [firstCard, ...lastsCards] = cards;
 
-const CARD_AMOUNT = 3;
+// Main container
 const mainContainer = document.querySelector(`.main`);
 
 // Controls container
@@ -38,6 +42,14 @@ const tasksContainer = renderContainer(`div`, [`board__tasks`], boardContainer);
 renderComponent(generateConrolsTemplate(controls), controlsContainer);
 renderComponent(generateSearchTemplate(search), searchContainer);
 renderComponent(generateFiltersTemplate(filterNames), filtersContainer);
-renderComponent(generateNewCardTemplate(), tasksContainer);
-renderComponent(generateCardsTemplate(CARD_AMOUNT), tasksContainer);
+renderComponent(generateNewCardTemplate(firstCard), tasksContainer);
+renderComponent(generateCardsTemplate(lastsCards.slice(0, MAX_CARDS_ON_BOARD - 1)), tasksContainer);
 renderComponent(generateButtonTemplate(button), boardContainer);
+
+const loadMoreButton = document.querySelector(`.load-more`);
+const onLoadMoreButtonClick = () => {
+  renderComponent(generateCardsTemplate(lastsCards.slice(MAX_CARDS_ON_BOARD - 1)), tasksContainer);
+  loadMoreButton.remove();
+};
+
+loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

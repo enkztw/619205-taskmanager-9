@@ -1,5 +1,6 @@
 import {getRandomNumber} from '../utils';
 import {getRandomElement} from '../utils';
+import {getRandomBoolean} from '../utils';
 
 const colorNames = [
   `black`,
@@ -11,61 +12,88 @@ const colorNames = [
 
 const hashtagNames = [`code`, `gym`, `work`];
 const descriptions = [
-  `It Looks Red, Tastes Blue`,
-  `Mozart Season`,
-  `Let There Be Love`,
-  `Время лечит, слова калечат`,
-  `Грокаем Алгоритмы`
+  `Изучить теорию`,
+  `Сделать домашку`,
+  `Пройти интенсив на соточку`
+];
+
+const months = [
+  `Januray`,
+  `February`,
+  `March`,
+  `April`,
+  `May`,
+  `July`,
+  `June`,
+  `August`,
+  `September`,
+  `October`,
+  `November`,
+  `December`
 ];
 
 const generateCardData = () => {
   const card = {
-    color: getRandomElement(colorNames),
-    hashtags: hashtagNames,
     description: getRandomElement(descriptions),
-    date: `${getRandomNumber(1, 31)} August`,
-    time: `${getRandomNumber(0, 12)}:${getRandomNumber(0, 60)}`
+    dueDate: new Date(new Date().getTime() + getRandomNumber(-604800000, 604800000)),
+    repeatingDays: new Map([
+      [`Mo`, getRandomBoolean()],
+      [`Tu`, getRandomBoolean()],
+      [`We`, getRandomBoolean()],
+      [`Th`, getRandomBoolean()],
+      [`Fr`, getRandomBoolean()],
+      [`Sa`, getRandomBoolean()],
+      [`Su`, getRandomBoolean()]
+    ]),
+    tags: new Set(hashtagNames),
+    color: getRandomElement(colorNames),
+    isFavorite: getRandomBoolean(),
+    isArchive: getRandomBoolean()
   };
 
   return card;
 };
 
-const generateCardsData = (amount) => {
-  const cards = [...Array(amount)].map(generateCardData);
+const generateCardsData = (amount) => [...Array(amount)].map(generateCardData);
 
-  return cards;
-};
-
-const generateHashtagTemplate = (hashtag) =>
+const generateHashtagTemplate = (tag) =>
   `<span class="card__hashtag-inner">
-      <span class="card__hashtag-name">
-        #${hashtag}
-      </span>
-    </span>`.trim();
+    <span class="card__hashtag-name">
+      #${tag}
+    </span>
+  </span>`.trim();
 
-const generateHashtagsTemplate = (hashtags) => hashtags
-    .map(generateHashtagTemplate).join(``);
+const generateHashtagsTemplate = (tags) => Array.from(tags)
+  .map(generateHashtagTemplate).join(``);
+
+
+const checkIsRepeated = (repeatingDays) => Array.from(repeatingDays.values())
+  .some((isRepeatedDay) => isRepeatedDay);
+
+const checkIsOutdated = (dueDate) => dueDate < new Date();
 
 const generateCardTemplate = ({
-  color,
-  hashtags,
   description,
-  date,
-  time
+  dueDate,
+  repeatingDays,
+  tags,
+  color,
+  isFavorite,
+  isArchive
 }) => {
-  const cardTemplate = `<article class="card card--${color}">
+  const cardTemplate = `<article class="card card--${color} ${checkIsRepeated(repeatingDays) ? `card--repeat` : ``} ${checkIsOutdated(dueDate) ? `card--deadline` : ``}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
           <button type="button" class="card__btn card__btn--edit">
             edit
           </button>
-          <button type="button" class="card__btn card__btn--archive">
+          <button type="button" class="card__btn card__btn--archive ${isArchive ? `card__btn--disabled` : ``}" >
             archive
           </button>
           <button
             type="button"
-            class="card__btn card__btn--favorites card__btn--disabled"
+            class="card__btn card__btn--favorites ${isFavorite ? `card__btn--disabled` : ``}"
           >
             favorites
           </button>
@@ -86,15 +114,15 @@ const generateCardTemplate = ({
             <div class="card__dates">
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">${date}</span>
-                  <span class="card__time">${time} PM</span>
+                  <span class="card__date">${dueDate.getDate()} ${months[dueDate.getMonth()]}</span>
+                  <span class="card__time">${dueDate.getHours() < 10 ? `0${dueDate.getHours()}` : `${dueDate.getHours()}`}:${dueDate.getMinutes() < 10 ? `0${dueDate.getMinutes()}` : `${dueDate.getMinutes()}`}</span>
                 </p>
               </div>
             </div>
   
             <div class="card__hashtag">
               <div class="card__hashtag-list">
-                ${generateHashtagsTemplate(hashtags)}
+                ${generateHashtagsTemplate(tags)}
               </div>
             </div>
           </div>
@@ -106,13 +134,12 @@ const generateCardTemplate = ({
   return cardTemplate;
 };
 
-const generateCardsTemplate = (amount) => {
-  const cards = generateCardsData(amount);
-  const cardsTemplate = cards.map((card) => generateCardTemplate(card));
-
-  return cardsTemplate.join(``);
-};
+const generateCardsTemplate = (cards) => cards.map(generateCardTemplate).join(``);
 
 export {colorNames};
+export {months};
+export {generateCardsData};
 export {generateCardsTemplate};
+export {checkIsRepeated};
+export {checkIsOutdated};
 
