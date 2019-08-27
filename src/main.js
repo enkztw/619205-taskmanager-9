@@ -18,23 +18,51 @@ import {TaskEdit} from './components/task-edit';
 import {button} from './components/button';
 import {generateButtonTemplate} from './components/button';
 
+
 const MAX_CARDS_ON_BOARD = 8;
 
 const renderTask = (taskMock, container) => {
   const task = new Task(taskMock);
   const taskEdit = new TaskEdit(taskMock);
 
-
   const taskElement = task.getElement();
   const taskEditElement = taskEdit.getElement();
 
   const onTaskElementEdit = () => container.replaceChild(taskEdit.getElement(), task.getElement());
   const onTaskElementSubmit = () => container.replaceChild(task.getElement(), taskEdit.getElement());
-  const onTaskElementRemove = () => taskEdit.removeElement();
+  const onTaskElementRemove = () => {
+    const taskIndex = tasks.findIndex((item) => item.id === task._id);
+    tasks.splice(taskIndex, 1);
 
-  taskElement.querySelector(`.card__btn--edit`).addEventListener(`click`, onTaskElementEdit);
+    taskEdit.removeElement();
+  };
+
+  const onEscClick = (evt) => {
+    if (evt.keyCode === 27) {
+      onTaskElementSubmit();
+    }
+
+    document.removeEventListener(`keydown`, onEscClick);
+  };
+
+  // Task events
+  taskElement.querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
+    onTaskElementEdit();
+    document.addEventListener(`keydown`, onEscClick);
+  });
+
+  // Task-edit events
   taskEditElement.addEventListener(`submit`, onTaskElementSubmit);
   taskEditElement.querySelector(`.card__delete`).addEventListener(`click`, onTaskElementRemove);
+
+  taskEditElement.querySelector(`.card__text`).addEventListener(`focus`, () => {
+    document.removeEventListener(`keydown`, onEscClick);
+  });
+
+  taskEditElement.querySelector(`.card__text`).addEventListener(`blur`, () => {
+    document.addEventListener(`keydown`, onEscClick);
+  });
+
 
   task.renderElement(container);
 };
