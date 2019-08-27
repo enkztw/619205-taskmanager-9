@@ -63,7 +63,7 @@ export class Task {
         </div>
   
         <div class="card__textarea-wrap">
-          <p class="card__text">${this._description}</p>
+          <p class="card__text">${this._description} - ${this._id}</p>
         </div>
   
         <div class="card__settings">
@@ -72,7 +72,7 @@ export class Task {
               <div class="card__date-deadline">
                 <p class="card__input-deadline-wrap">
                   <span class="card__date">${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]}</span>
-                  <span class="card__time">${this._dueDate.getHours() < 10 ? `0${this._dueDate.getHours()}` : `${this._dueDate.getHours()}`}:${this._dueDate.getMinutes() < 10 ? `0${this._dueDate.getMinutes()}` : `${this._dueDate.getMinutes()}`}</span>
+                  <span class="card__time">${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}</span>
                 </p>
               </div>
             </div>

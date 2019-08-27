@@ -31,14 +31,23 @@ const renderTask = (taskMock, container) => {
   const onTaskElementEdit = () => container.replaceChild(taskEdit.getElement(), task.getElement());
   const onTaskElementSubmit = () => container.replaceChild(task.getElement(), taskEdit.getElement());
   const onTaskElementRemove = () => {
-    const taskIndex = tasks.findIndex((item) => item.id === task._id);
-    tasks.splice(taskIndex, 1);
-
+    const removedTaskIndex = tasks.findIndex((item) => item.id === task._id);
+    tasks.splice(removedTaskIndex, 1);
     taskEdit.removeElement();
+
+    if (tasks.length === MAX_CARDS_ON_BOARD) {
+      loadMoreButton.classList.add(`visually-hidden`);
+    }
+
+    if (tasks.length >= MAX_CARDS_ON_BOARD) {
+      const addedTaskIndex = parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10) + 1;
+      const addedTask = new Task(tasks.find((item) => item.id === addedTaskIndex));
+      addedTask.renderElement(container);
+    }
   };
 
   const onEscClick = (evt) => {
-    if (evt.keyCode === 27) {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
       onTaskElementSubmit();
     }
 
@@ -100,7 +109,8 @@ const onLoadMoreButtonClick = () => {
   for (const task of tasks.slice(MAX_CARDS_ON_BOARD)) {
     renderTask(task, tasksContainer);
   }
-  loadMoreButton.remove();
+
+  loadMoreButton.classList.add(`visually-hidden`);
 };
 
 loadMoreButton.addEventListener(`click`, onLoadMoreButtonClick);

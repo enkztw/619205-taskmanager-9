@@ -4,15 +4,15 @@ import {checkIsRepeated} from './task';
 import {checkIsOutdated} from './task';
 import {createElement} from '../dom-utils';
 
-const generateColorTemplate = (color, currentColor) => {
+const generateColorTemplate = (color, currentColor, id) => {
   const colorTemplate =
-    `<input type="radio" id="color-${color}-1" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}" ${color === currentColor ? `checked` : ``}/>
-    <label for="color-${color}-1" class="card__color card__color--${color}">${color}</label>`;
+    `<input type="radio" id="color-${color}-${id}" class="card__color-input card__color-input--${color} visually-hidden" name="color" value="${color}" ${color === currentColor ? `checked` : ``}/>
+    <label for="color-${color}-${id}" class="card__color card__color--${color}">${color}</label>`;
 
   return colorTemplate;
 };
 
-const generateColorsTemplate = (colors, currentColor) => colors.map((color) => generateColorTemplate(color, currentColor)).join(``);
+const generateColorsTemplate = (colors, currentColor, id) => colors.map((color) => generateColorTemplate(color, currentColor, id)).join(``);
 
 const generateHashtagTemplate = (tag) =>
   `<span class="card__hashtag-inner">
@@ -33,12 +33,12 @@ const generateHashtagTemplate = (tag) =>
 const generateHashtagsTemplate = (tags) => Array.from(tags)
   .map(generateHashtagTemplate).join(``);
 
-const generateRepeatingDayTemplate = (day, isRepeated) =>
-  `<input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-${day}-4" name="repeat" value="${day}" ${isRepeated ? `checked` : ``}/>
-  <label class="card__repeat-day" for="repeat-${day}-4">${day}</label>`;
+const generateRepeatingDayTemplate = (day, isRepeated, id) =>
+  `<input class="visually-hidden card__repeat-day-input" type="checkbox" id="repeat-${day}-${id}" name="repeat" value="${day}" ${isRepeated ? `checked` : ``}/>
+  <label class="card__repeat-day" for="repeat-${day}-${id}">${day}</label>`;
 
-const generateRepeatingDaysTemplate = (repeatingDays) => Array.from(repeatingDays.entries())
-  .map(([day, isRepeated]) => generateRepeatingDayTemplate(day, isRepeated)).join(``);
+const generateRepeatingDaysTemplate = (repeatingDays, id) => Array.from(repeatingDays.entries())
+  .map(([day, isRepeated]) => generateRepeatingDayTemplate(day, isRepeated, id)).join(``);
 
 class TaskEdit {
   constructor({description,
@@ -106,7 +106,7 @@ class TaskEdit {
                     type="text"
                     placeholder=""
                     name="date"
-                    value="${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]} ${this._dueDate.getHours() < 10 ? `0${this._dueDate.getHours()}` : `${this._dueDate.getHours()}`}:${this._dueDate.getMinutes() < 10 ? `0${this._dueDate.getMinutes()}` : `${this._dueDate.getMinutes()}`}"
+                    value="${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]} ${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}"
                   />
                 </label>
               </fieldset>
@@ -117,7 +117,7 @@ class TaskEdit {
   
               <fieldset class="card__repeat-days">
                 <div class="card__repeat-days-inner">
-                  ${generateRepeatingDaysTemplate(this._repeatingDays)}
+                  ${generateRepeatingDaysTemplate(this._repeatingDays, this._id)}
                 </div>
               </fieldset>
             </div>
@@ -141,7 +141,7 @@ class TaskEdit {
           <div class="card__colors-inner">
             <h3 class="card__colors-title">Color</h3>
             <div class="card__colors-wrap">
-              ${generateColorsTemplate(colorNames, this._color)}
+              ${generateColorsTemplate(colorNames, this._color, this._id)}
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import {getRandomNumber} from './utils';
 import {getRandomElement} from './utils';
 import {getRandomBoolean} from './utils';
 
-const CARD_AMOUNT = 8;
+const CARD_AMOUNT = 10;
 
 
 const colorNames = [
