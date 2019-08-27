@@ -33,17 +33,18 @@ const renderTask = (taskMock, container) => {
   const onTaskElementRemove = () => {
     const removedTaskIndex = tasks.findIndex((item) => item.id === task._id);
     tasks.splice(removedTaskIndex, 1);
-    taskEdit.removeElement();
 
     if (tasks.length === MAX_CARDS_ON_BOARD) {
       loadMoreButton.classList.add(`visually-hidden`);
     }
 
     if (tasks.length >= MAX_CARDS_ON_BOARD) {
-      const addedTaskIndex = parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10) + 1;
-      const addedTask = new Task(tasks.find((item) => item.id === addedTaskIndex));
-      addedTask.renderElement(container);
+      const nextTaskIndex = parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10) + 1;
+      renderTask(tasks.find((item) => item.id === nextTaskIndex), container);
     }
+
+    taskEdit.removeElement();
+    document.removeEventListener(`keydown`, onEscClick);
   };
 
   const onEscClick = (evt) => {
