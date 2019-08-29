@@ -1,5 +1,5 @@
+import TaskBaseComponent from './task-base-component';
 import {months} from '../data';
-import {createElement} from '../dom-utils';
 
 const generateHashtagTemplate = (tag) =>
   `<span class="card__hashtag-inner">
@@ -11,13 +11,7 @@ const generateHashtagTemplate = (tag) =>
 const generateHashtagsTemplate = (tags) => Array.from(tags)
   .map(generateHashtagTemplate).join(``);
 
-
-const checkIsRepeated = (repeatingDays) => Array.from(repeatingDays.values())
-  .some((isRepeatedDay) => isRepeatedDay);
-
-const checkIsOutdated = (dueDate) => dueDate < new Date();
-
-export class Task {
+export class Task extends TaskBaseComponent {
   constructor({description,
     dueDate,
     repeatingDays,
@@ -26,6 +20,9 @@ export class Task {
     isFavorite,
     isArchive,
     id}) {
+    super();
+    this._checkIsRepeated = super.checkIsRepeated;
+    this._checkIsOutdated = super.checkIsOutdated;
     this._description = description;
     this._dueDate = dueDate;
     this._repeatingDays = repeatingDays;
@@ -34,11 +31,10 @@ export class Task {
     this._isFavorite = isFavorite;
     this._isArchive = isArchive;
     this._id = id;
-    this._element = null;
   }
 
-  getTemplate() {
-    return `<article class="card card--${this._color} ${checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
+  get template() {
+    return `<article class="card card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${this._checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -88,27 +84,5 @@ export class Task {
     </div>
   </article>`.trim();
   }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  renderElement(container) {
-    this.getElement();
-    container.append(this._element);
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
-  }
-
 }
-
-export {checkIsRepeated};
-export {checkIsOutdated};
 
