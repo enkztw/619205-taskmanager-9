@@ -1,8 +1,6 @@
+import TaskBaseComponent from './task-base-component';
 import {colorNames} from '../data';
 import {months} from '../data';
-import {checkIsRepeated} from './task';
-import {checkIsOutdated} from './task';
-import {createElement} from '../dom-utils';
 
 const generateColorTemplate = (color, currentColor, id) => {
   const colorTemplate =
@@ -40,7 +38,7 @@ const generateRepeatingDayTemplate = (day, isRepeated, id) =>
 const generateRepeatingDaysTemplate = (repeatingDays, id) => Array.from(repeatingDays.entries())
   .map(([day, isRepeated]) => generateRepeatingDayTemplate(day, isRepeated, id)).join(``);
 
-class TaskEdit {
+export default class TaskEdit extends TaskBaseComponent {
   constructor({description,
     dueDate,
     repeatingDays,
@@ -49,6 +47,9 @@ class TaskEdit {
     isFavorite,
     isArchive,
     id}) {
+    super();
+    this._checkIsRepeated = super.checkIsRepeated;
+    this._checkIsOutdated = super.checkIsOutdated;
     this._description = description;
     this._dueDate = dueDate;
     this._repeatingDays = repeatingDays;
@@ -60,8 +61,8 @@ class TaskEdit {
     this._element = null;
   }
 
-  getTemplate() {
-    return `<article class="card card--edit card--${this._color} ${checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
+  get template() {
+    return `<article class="card card--edit card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${this._checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__control">
@@ -153,27 +154,4 @@ class TaskEdit {
       </div>
     </form>`.trim();
   }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  renderElement(container) {
-    this.getElement();
-    container.append(this._element);
-  }
-
-  removeElement() {
-    this._element.remove();
-    this._element = null;
-  }
-
 }
-
-export {
-  TaskEdit
-};
