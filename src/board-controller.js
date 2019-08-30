@@ -4,6 +4,8 @@ import {Task} from './components/task';
 import TaskEdit from './components/task-edit';
 import LoadMoreButton from './components/load-more-button';
 import NoTasks from './components/no-tasks';
+import SortList from './components/sort-list';
+import Sort from './components/sort';
 
 
 const MAX_CARDS_ON_BOARD = 8;
@@ -16,6 +18,26 @@ export default class BoardController {
     this._tasksList = new TasksList();
     this._button = new LoadMoreButton();
     this._noTasks = new NoTasks();
+    this._sortList = new SortList();
+    this._currentTasks = this._tasks;
+
+    this._sorts = [
+      {name: `default`, title: `DEFAULT`},
+      {name: `dateup`, title: `DATE up`},
+      {name: `datedown`, title: `DATE down`}
+    ];
+
+    this._taskComparatorMap = {
+      default() {
+        return;
+      },
+      dateup(a, b) {
+        return a.dueDate.getTime() - b.dueDate.getTime();
+      },
+      datedown(a, b) {
+        return b.dueDate.getTime() - a.dueDate.getTime();
+      }
+    };
   }
 
   renderElement(container, element) {
@@ -24,7 +46,7 @@ export default class BoardController {
 
   boardInit() {
     const onLoadMoreButtonClick = () => {
-      for (const task of this._tasks.slice(MAX_CARDS_ON_BOARD)) {
+      for (const task of this._currentTasks.slice(MAX_CARDS_ON_BOARD)) {
         this._renderTask(task);
       }
 
@@ -32,10 +54,15 @@ export default class BoardController {
     };
 
     this.renderElement(this._container, this._board.element);
+    this.renderElement(this._board.element, this._sortList.element);
     this.renderElement(this._board.element, this._tasksList.element);
     this.renderElement(this._board.element, this._button.element);
 
     this._renderNoTasksMessage();
+
+    for (const sort of this._sorts) {
+      this._renderSort(sort);
+    }
 
     for (const task of this._tasks.slice(0, MAX_CARDS_ON_BOARD)) {
       this._renderTask(task);
@@ -45,10 +72,34 @@ export default class BoardController {
   }
 
   _renderNoTasksMessage() {
-    if (!this._tasks.length || !this._tasks.some((item) => item.isArchive)) {
+    if (!this._tasks.some((item) => item.isArchive)) {
       this._board.element.innerHTML = ``;
       this.renderElement(this._board.element, this._noTasks.element);
     }
+  }
+
+  _renderSort(sortData) {
+    const sort = new Sort(sortData);
+    const onSortClick = () => {
+      const name = sort.element.getAttribute(`data-name`);
+      const tasksCopy = [...this._tasks];
+      this._currentTasks = tasksCopy.sort(this._taskComparatorMap[name]);
+      this._tasksList.element.innerHTML = ``;
+
+      for (const task of this._currentTasks.slice(0, MAX_CARDS_ON_BOARD)) {
+        this._renderTask(task);
+      }
+
+      if (this._currentTasks.length > MAX_CARDS_ON_BOARD) {
+        this._button.element.classList.remove(`visually-hidden`);
+      } else {
+        this._button.element.classList.add(`visually-hidden`);
+      }
+    };
+
+    sort.element.addEventListener(`click`, onSortClick);
+
+    sort.renderElement(this._sortList.element);
   }
 
   _renderTask(taskMock) {
@@ -61,16 +112,16 @@ export default class BoardController {
     const onTaskElementEdit = () => this._tasksList.element.replaceChild(taskEditElement, taskElement);
     const onTaskElementSubmit = () => this._tasksList.element.replaceChild(taskElement, taskEditElement);
     const onTaskElementRemove = () => {
-      const removedTaskIndex = this._tasks.findIndex((item) => item.id === task._id);
-      this._tasks.splice(removedTaskIndex, 1);
+      const removedTaskIndex = this._currentTasks.findIndex((item) => item.id === task._id);
+      const nextTaskIndex = this._currentTasks.findIndex((item) => item.id === parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10));
+      this._currentTasks.splice(removedTaskIndex, 1);
 
-      if (this._tasks.length === MAX_CARDS_ON_BOARD) {
+      if (this._currentTasks.length === MAX_CARDS_ON_BOARD) {
         this._button.element.classList.add(`visually-hidden`);
       }
 
-      if (this._tasks.length >= document.querySelector(`.board__tasks`).childNodes.length) {
-        const nextTaskIndex = parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10) + 1;
-        this._renderTask(this._tasks.find((item) => item.id === nextTaskIndex), this._tasksList.element);
+      if (this._tasksList.element.childNodes.length <= this._currentTasks.length) {
+        this._renderTask(this._currentTasks[nextTaskIndex], this._tasksList.element);
       }
 
       this._renderNoTasksMessage();
