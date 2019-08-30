@@ -28,8 +28,8 @@ export default class BoardController {
     ];
 
     this._taskComparatorMap = {
-      default() {
-        return;
+      default(a, b) {
+        return a.id - b.id;
       },
       dateup(a, b) {
         return a.dueDate.getTime() - b.dueDate.getTime();
@@ -82,7 +82,7 @@ export default class BoardController {
     const sort = new Sort(sortData);
     const onSortClick = () => {
       const name = sort.element.getAttribute(`data-name`);
-      const tasksCopy = [...this._tasks];
+      const tasksCopy = [...this._currentTasks];
       this._currentTasks = tasksCopy.sort(this._taskComparatorMap[name]);
       this._tasksList.element.innerHTML = ``;
 
@@ -95,6 +95,8 @@ export default class BoardController {
       } else {
         this._button.element.classList.add(`visually-hidden`);
       }
+
+      console.log(this._currentTasks.length);
     };
 
     sort.element.addEventListener(`click`, onSortClick);
