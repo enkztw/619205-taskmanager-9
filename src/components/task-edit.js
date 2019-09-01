@@ -17,7 +17,7 @@ const generateHashtagTemplate = (tag) =>
   <input
     type="hidden"
     name="hashtag"
-    value="repeat"
+    value="${tag}"
     class="card__hashtag-hidden-input"
   />
   <p class="card__hashtag-name">
@@ -59,10 +59,12 @@ export default class TaskEdit extends TaskBaseComponent {
     this._isArchive = isArchive;
     this._id = id;
     this._element = null;
+
+    this._subscribeOnEvents();
   }
 
   get template() {
-    return `<article class="card card--edit card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${this._checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
+    return `<article class="card card--edit card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``}${this._checkIsOutdated(this._dueDate) && this._dueDate ? ` card--deadline` : ``}" data-index="${this._id}">
     <form class="card__form" method="get">
       <div class="card__inner">
         <div class="card__control">
@@ -97,26 +99,26 @@ export default class TaskEdit extends TaskBaseComponent {
           <div class="card__details">
             <div class="card__dates">
               <button class="card__date-deadline-toggle" type="button">
-                date: <span class="card__date-status">yes</span>
+                date: <span class="card__date-status">${this._dueDate ? `yes` : `no`}</span>
               </button>
   
-              <fieldset class="card__date-deadline">
+              <fieldset class="card__date-deadline${!this._dueDate ? ` visually-hidden` : ``}">
                 <label class="card__input-deadline-wrap">
                   <input
                     class="card__date"
                     type="text"
                     placeholder=""
                     name="date"
-                    value="${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]} ${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}"
+                    value="${this._dueDate ? `${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]} ${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}` : ``}"
                   />
                 </label>
               </fieldset>
   
               <button class="card__repeat-toggle" type="button">
-                repeat:<span class="card__repeat-status">yes</span>
+                repeat:<span class="card__repeat-status">${this._checkIsRepeated(this._repeatingDays) ? `yes` : `no`}</span>
               </button>
   
-              <fieldset class="card__repeat-days">
+              <fieldset class="card__repeat-days${!this._checkIsRepeated(this._repeatingDays) ? ` visually-hidden` : ``}">
                 <div class="card__repeat-days-inner">
                   ${generateRepeatingDaysTemplate(this._repeatingDays, this._id)}
                 </div>
@@ -153,5 +155,86 @@ export default class TaskEdit extends TaskBaseComponent {
         </div>
       </div>
     </form>`.trim();
+  }
+
+  _subscribeOnEvents() {
+    const onHashtagDeleteButton = (evt) => {
+      evt.preventDefault();
+
+      const hashtag = evt.target.closest(`.card__hashtag-inner`);
+      hashtag.remove();
+    };
+
+    this.element.querySelector(`.card__hashtag-input`).addEventListener(`keydown`, (evt) => {
+      if (evt.key === `Enter`) {
+        evt.preventDefault();
+
+        const hashtag = document.createElement(`span`);
+        hashtag.classList.add(`card__hashtag-inner`);
+
+        hashtag.innerHTML = `
+        <input 
+        type="hidden" 
+        name="hashtag" 
+        value="${evt.target.value}" 
+        class="card__hashtag-hidden-input" 
+        />
+        <p class="card__hashtag-name">
+        #${evt.target.value}
+        </p>
+        <button type="button" class="card__hashtag-delete">
+        delete
+        </button>`.trim();
+
+        hashtag.querySelector(`.card__hashtag-delete`).addEventListener(`click`, onHashtagDeleteButton);
+        this.element.querySelector(`.card__hashtag-list`).insertAdjacentElement(`beforeend`, hashtag);
+        evt.target.value = ``;
+      }
+    });
+
+    for (const color of this.element.querySelectorAll(`.card__color-input`)) {
+      color.addEventListener(`click`, (evt) => {
+        this.element.className = this.element.classList.value.replace(`${this.element.classList[2]}`, `card--${evt.target.value}`);
+      });
+    }
+
+    this.element.querySelector(`.card__repeat-toggle`).addEventListener(`click`, () => {
+      if (this.element.querySelector(`.card__repeat-status`).textContent === `yes`) {
+        this.element.classList.remove(`card--repeat`);
+        this.element.querySelector(`.card__repeat-status`).textContent = `no`;
+
+        for (const repeatingDay of this.element.querySelectorAll(`.card__repeat-day-input`)) {
+          repeatingDay.checked = false;
+        }
+
+      } else {
+        this.element.classList.add(`card--repeat`);
+        this.element.querySelector(`.card__repeat-status`).textContent = `yes`;
+
+        for (const repeatingDay of this.element.querySelectorAll(`.card__repeat-day-input`)) {
+          repeatingDay.checked = this._repeatingDays.get(repeatingDay.value);
+        }
+      }
+
+      this.element.querySelector(`.card__repeat-days`).classList.toggle(`visually-hidden`);
+    });
+
+    this.element.querySelector(`.card__date-deadline-toggle`).addEventListener(`click`, () => {
+      const date = this.element.querySelector(`.card__date`).value;
+      if (this.element.querySelector(`.card__date-status`).textContent === `yes`) {
+        this.element.querySelector(`.card__date-status`).textContent = `no`;
+        this.element.querySelector(`.card__date`).value = ``;
+
+      } else {
+        this.element.querySelector(`.card__date-status`).textContent = `yes`;
+        this.element.querySelector(`.card__date`).value = date;
+      }
+
+      this.element.querySelector(`.card__date-deadline`).classList.toggle(`visually-hidden`);
+    });
+
+    for (const hashtag of this.element.querySelectorAll(`.card__hashtag-inner`)) {
+      hashtag.querySelector(`.card__hashtag-delete`).addEventListener(`click`, onHashtagDeleteButton);
+    }
   }
 }

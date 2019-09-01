@@ -34,7 +34,7 @@ export class Task extends TaskBaseComponent {
   }
 
   get template() {
-    return `<article class="card card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``} ${this._checkIsOutdated(this._dueDate) ? `card--deadline` : ``}" data-index="${this._id}">
+    return `<article class="card card--${this._color} ${this._checkIsRepeated(this._repeatingDays) ? `card--repeat` : ``}${this._checkIsOutdated(this._dueDate) && this._dueDate ? ` card--deadline` : ``}" data-index="${this._id}">
     <div class="card__form">
       <div class="card__inner">
         <div class="card__control">
@@ -65,10 +65,10 @@ export class Task extends TaskBaseComponent {
         <div class="card__settings">
           <div class="card__details">
             <div class="card__dates">
-              <div class="card__date-deadline">
+              <div class="card__date-deadline${!this._dueDate ? ` visually-hidden` : ``}">
                 <p class="card__input-deadline-wrap">
-                  <span class="card__date">${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]}</span>
-                  <span class="card__time">${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}</span>
+                  <span class="card__date">${this._dueDate ? `${this._dueDate.getDate()} ${months[this._dueDate.getMonth()]}` : ``}</span>
+                  <span class="card__time">${this._dueDate ? `${`${this._dueDate.getHours()}`.padStart(2, `0`)}:${`${this._dueDate.getMinutes()}`.padStart(2, `0`)}` : ``}</span>
                 </p>
               </div>
             </div>

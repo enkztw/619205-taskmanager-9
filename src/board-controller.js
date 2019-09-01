@@ -1,7 +1,6 @@
 import Board from './components/board';
 import TasksList from './components/tasks-list';
-import {Task} from './components/task';
-import TaskEdit from './components/task-edit';
+import TaskController from './task-contoller';
 import LoadMoreButton from './components/load-more-button';
 import NoTasks from './components/no-tasks';
 import SortList from './components/sort-list';
@@ -38,13 +37,17 @@ export default class BoardController {
         return b.dueDate.getTime() - a.dueDate.getTime();
       }
     };
+
+    this._subscribers = [];
+    this._onChangeView = this._onChangeView.bind(this);
+    this._onDataChange = this._onDataChange.bind(this);
   }
 
-  renderElement(container, element) {
-    container.append(element);
+  renderElement(container, element, position = `beforeend`) {
+    container.insertAdjacentElement(position, element);
   }
 
-  boardInit() {
+  init() {
     const onLoadMoreButtonClick = () => {
       for (const task of this._currentTasks.slice(MAX_CARDS_ON_BOARD)) {
         this._renderTask(task);
@@ -69,6 +72,16 @@ export default class BoardController {
     }
 
     this._button.element.addEventListener(`click`, onLoadMoreButtonClick);
+  }
+
+  _renderBoard(tasksMock) {
+    this._tasksList.removeElement();
+
+    this.renderElement(this._sortList.element, this._tasksList.element, `afterend`);
+
+    for (const task of tasksMock) {
+      this._renderTask(task);
+    }
   }
 
   _renderNoTasksMessage() {
@@ -96,7 +109,6 @@ export default class BoardController {
         this._button.element.classList.add(`visually-hidden`);
       }
 
-      console.log(this._currentTasks.length);
     };
 
     sort.element.addEventListener(`click`, onSortClick);
@@ -104,61 +116,33 @@ export default class BoardController {
     sort.renderElement(this._sortList.element);
   }
 
-  _renderTask(taskMock) {
-    const task = new Task(taskMock);
-    const taskEdit = new TaskEdit(taskMock);
+  _renderTask(task) {
+    const taskController = new TaskController(this._tasksList, task, this._onDataChange, this._onChangeView);
 
-    const taskElement = task.element;
-    const taskEditElement = taskEdit.element;
+    this._subscribers.push(taskController.setDefaultView.bind(taskController));
+  }
 
-    const onTaskElementEdit = () => this._tasksList.element.replaceChild(taskEditElement, taskElement);
-    const onTaskElementSubmit = () => this._tasksList.element.replaceChild(taskElement, taskEditElement);
-    const onTaskElementRemove = () => {
-      const removedTaskIndex = this._currentTasks.findIndex((item) => item.id === task._id);
-      const nextTaskIndex = this._currentTasks.findIndex((item) => item.id === parseInt(document.querySelector(`.board__tasks`).lastChild.getAttribute(`data-index`), 10));
-      this._currentTasks.splice(removedTaskIndex, 1);
+  _onDataChange(newData, oldData) {
+    const currentCardsOnBoard = this._tasksList.element.childNodes.length;
+    const oldDataIndex = this._currentTasks.findIndex((item) => item.id === oldData.id);
+    if (!newData) {
+      this._currentTasks.splice(oldDataIndex, 1);
+    } else {
+      this._currentTasks[oldDataIndex] = newData;
+    }
 
-      if (this._currentTasks.length === MAX_CARDS_ON_BOARD) {
-        this._button.element.classList.add(`visually-hidden`);
-      }
+    this._renderBoard(this._currentTasks.slice(0, currentCardsOnBoard));
 
-      if (this._tasksList.element.childNodes.length <= this._currentTasks.length) {
-        this._renderTask(this._currentTasks[nextTaskIndex], this._tasksList.element);
-      }
+    if (currentCardsOnBoard < this._currentTasks.length) {
+      this._button.element.classList.remove(`visually-hidden`);
+    } else {
+      this._button.element.classList.add(`visually-hidden`);
+    }
+  }
 
-      this._renderNoTasksMessage();
-
-      taskEdit.removeElement();
-      document.removeEventListener(`keydown`, onEscClick);
-    };
-
-    const onEscClick = (evt) => {
-      if (evt.key === `Escape` || evt.key === `Esc`) {
-        onTaskElementSubmit();
-      }
-
-      document.removeEventListener(`keydown`, onEscClick);
-    };
-
-    // Task events
-    taskElement.querySelector(`.card__btn--edit`).addEventListener(`click`, () => {
-      onTaskElementEdit();
-      document.addEventListener(`keydown`, onEscClick);
-    });
-
-    // Task-edit events
-    taskEditElement.addEventListener(`submit`, onTaskElementSubmit);
-    taskEditElement.querySelector(`.card__delete`).addEventListener(`click`, onTaskElementRemove);
-
-    taskEditElement.querySelector(`.card__text`).addEventListener(`focus`, () => {
-      document.removeEventListener(`keydown`, onEscClick);
-    });
-
-    taskEditElement.querySelector(`.card__text`).addEventListener(`blur`, () => {
-      document.addEventListener(`keydown`, onEscClick);
-    });
-
-
-    task.renderElement(this._tasksList.element);
+  _onChangeView() {
+    for (const subscriber of this._subscribers) {
+      subscriber();
+    }
   }
 }

@@ -34,4 +34,4 @@ renderComponent(generateFiltersTemplate(filterNames), filtersContainer);
 
 // Board init
 const boardController = new BoardController(mainContainer, tasks);
-boardController.boardInit();
+boardController.init();
