@@ -21,8 +21,8 @@ export default class BaseComponent {
     return this._element;
   }
 
-  renderElement(container) {
-    container.append(this.element);
+  renderElement(container, position = `beforeend`) {
+    container.insertAdjacentElement(position, this.element);
   }
 
   removeElement() {
